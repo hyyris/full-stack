@@ -4,8 +4,8 @@ import axios from 'axios'
 const App = () => {
   const [countries, setCountries] = useState([]) 
   const [newSearch, setNewSearch] = useState('')
-  //const [newName, setNewName] = useState('')
-  //const [newNumber, setNewNumber] = useState('')
+  const [showCountry, setShowCountry] = useState(null)
+  const [weather, setWeather] = useState([])
   
   const hook = () => {
     axios
@@ -15,50 +15,61 @@ const App = () => {
       })
   }
   useEffect(hook, [])
+
+  const weatherHook = (capital, countrycode) => {
+    const apikey = process.env.REACT_APP_API_KEY
+  
+    axios
+      .get(`https://pro.openweathermap.org/data/2.5/weather?q=${capital},${countrycode}&units=metric&appid=${apikey}`)
+      .then(({data}) => {
+        if (!weather.find(w => w.capital === capital)) {
+          setWeather(weather.concat({
+            capital: capital,
+            temp: data.main.temp,
+            wind: data.wind.speed,
+            imgUrl: `http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`
+          }))
+        }
+      })
+  }
   
   const countriesToShow = newSearch.length > 0
     ? countries.filter(person => person.name.common.toLowerCase().includes(newSearch.toLowerCase()))
     : countries
-/*
-  const handleNameChange = (event) => {
-    setNewName(event.target.value)
-  }
-  const handleNumberChange = (event) => {
-    setNewNumber(event.target.value)
-  }*/
-  const handleSearchChange = (event) => {
-    setNewSearch(event.target.value)
-  }
-/*
-  const addName = (event) => {
-    event.preventDefault()
-    if (persons.find(p => p.name === newName)) {
-      alert(`${newName} is already added to phonebook`);
-      return;
-    }
-    const nameObject = {
-      name: newName,
-      number: newNumber,
-      id: persons.length + 1, // toimii kunnes ruvetaan poistamaan
-    }
 
-    setPersons(persons.concat(nameObject))
-    setNewName('')
-    setNewNumber('')
+  const handleSearchChange = (event) => {
+    setShowCountry(null);
+    setNewSearch(event.target.value)
+    setWeather([])
   }
-*/
+
+  const selectedCountry = (showCountry || countriesToShow.length === 1)
+    ? showCountry || countriesToShow[0]
+    : null;
+
+  if (selectedCountry) {
+    if (weather.length < selectedCountry.capital.length) {
+      weatherHook(selectedCountry.capital[weather.length], selectedCountry.cca2)
+    }
+  }
+
   return (
     <div>
       <Filter value={newSearch} onChange={handleSearchChange} />
-      <Countries countries={countriesToShow} />
+      {newSearch.length > 0
+        ? <Countries countries={countriesToShow} country={selectedCountry} show={setShowCountry} />
+        : <></>}
+      {weather
+        ? weather.map(w => <Weather key={w.capital} weather={w} />)
+        : <></>}
     </div>
   )
 }
 
-const Countries = ({countries}) => {
-  if (countries.length === 1) {
+const Countries = ({countries, country, show}) => {
+  if (country) {
     return (
-      <Country country={countries[0]} />
+      <Country country={country} />
     )
   } else if (countries.length > 10) {
     return (
@@ -67,7 +78,7 @@ const Countries = ({countries}) => {
   } else {
     return (
       <>
-        {countries.map(c => <p key={c.name.common}>{c.name.common}</p>)}
+        {countries.map(c => <p key={c.name.common}>{c.name.common} <Button handleClick={() => show(c)} /></p>)}
       </>
     )
   }
@@ -90,32 +101,22 @@ const Country = ({country}) => {
   )
 }
 
-
-/*
-const PersonForm = (params) => {
+const Weather = ({weather}) => {
   return (
-    <form onSubmit={params.onSubmit}>
-      <div>
-        name: 
-        <input
-          value={params.nameValue}
-          onChange={params.nameOnChange}
-        />
-      </div>
-      <div>
-        number:
-        <input
-          value={params.numberValue}
-          onChange={params.numberOnChange}
-        />
-      </div>
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
+    <>
+      <h3>Weather in {weather.capital}</h3>
+      <p>temperature {weather.temp} Celcius</p>
+      <img alt="weather icon" src={weather.imgUrl}></img>
+      <p>wind {weather.wind} m/s</p>
+    </>
   )
-}*/
+}
 
+const Button = ({ handleClick }) => {
+  return (
+    <button onClick={handleClick}>show</button>
+  )
+}
 
 const Filter = (params) => {
   return (

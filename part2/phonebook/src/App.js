@@ -11,6 +11,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newSearch, setNewSearch] = useState('')
+  const [notificationMessage, setNotificationMessage] = useState(null)
   const hook = () => {
     personsService
       .getAll()
@@ -50,6 +51,23 @@ const App = () => {
             setPersons(persons.map(p => p.id !== existingPerson.id ? p : data))
             setNewName('')
             setNewNumber('')
+            setNotificationMessage({
+                message: `Updated '${data.name}'`,
+                error: false
+              }
+            )
+            setTimeout(() => {
+              setNotificationMessage(null)
+            }, 3000)
+      }).catch(error => {
+        console.log(error);
+        setNotificationMessage({
+          message: `Information of  ${existingPerson.name} has already been removed from server`,
+          error: true
+        })
+        setTimeout(() => {
+          setNotificationMessage(null)
+        }, 4000)
       })
       }
     } else {
@@ -63,6 +81,14 @@ const App = () => {
           setPersons(persons.concat(data))
           setNewName('')
           setNewNumber('')
+          setNotificationMessage({
+            message: `Added '${data.name}'`,
+            error: false
+          }
+          )
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 3000)
       })
     }
   }
@@ -70,6 +96,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notificationMessage} />
       <Filter value={newSearch} onChange={handleSearchChange} />
       <h3>add a new</h3>
       <PersonForm 
@@ -135,6 +162,30 @@ const Filter = (params) => {
         value={params.newSearch}
         onChange={params.onChange}
       />
+    </div>
+  )
+}
+
+const Notification = ({ message }) => {
+  const notificationStyle = {
+    color: 'green',
+    background: 'lightgrey',
+    fontStyle: 'italic',
+    fontSize: 20,
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  }
+  if (message === null) {
+    return null
+  } else if (message.error) {
+    notificationStyle.color = 'red'
+  }
+
+  return (
+    <div style={notificationStyle}>
+      {message.message}
     </div>
   )
 }

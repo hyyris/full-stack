@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import personsService from './services/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([
@@ -12,10 +12,10 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [newSearch, setNewSearch] = useState('')
   const hook = () => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
+    personsService
+      .getAll()
+      .then(data => {
+        setPersons(data)
       })
   }
   
@@ -33,22 +33,38 @@ const App = () => {
   const handleSearchChange = (event) => {
     setNewSearch(event.target.value)
   }
+  const removePerson = (id) => {
+    if (window.confirm(`Delete ${persons.find(p => p.id === id).name}?`)) {
+      personsService.remove(id).then(() => setPersons(persons.filter(p => p.id !== id)))
+    }
+  }
 
   const addName = (event) => {
     event.preventDefault()
-    if (persons.find(p => p.name === newName)) {
-      alert(`${newName} is already added to phonebook`);
-      return;
+    const existingPerson = persons.find(p => p.name.toLowerCase() === newName.toLowerCase());
+    if (existingPerson) {
+      if (window.confirm(`${existingPerson.name} is already added to phonebook, replace the old number with a new one?`)) {
+        personsService
+          .update(existingPerson.id, {...existingPerson, number: newNumber})
+          .then(data => {
+            setPersons(persons.map(p => p.id !== existingPerson.id ? p : data))
+            setNewName('')
+            setNewNumber('')
+      })
+      }
+    } else {
+      const nameObject = {
+        name: newName,
+        number: newNumber,
+      }
+      personsService
+        .create(nameObject)
+        .then(data => {
+          setPersons(persons.concat(data))
+          setNewName('')
+          setNewNumber('')
+      })
     }
-    const nameObject = {
-      name: newName,
-      number: newNumber,
-      id: persons.length + 1, // toimii kunnes ruvetaan poistamaan
-    }
-
-    setPersons(persons.concat(nameObject))
-    setNewName('')
-    setNewNumber('')
   }
 
   return (
@@ -64,15 +80,24 @@ const App = () => {
         numberOnChange={handleNumberChange}
       />
       <h3>Numbers</h3>
-      <Persons persons={personsToShow} />
+      <Persons
+        persons={personsToShow} 
+        removePerson={removePerson}
+      />
     </div>
   )
 }
 
-const Persons = ({persons}) => {
+const Persons = ({persons, removePerson}) => {
   return (
     <>
-      {persons.map(person => <p key={person.id}>{person.name} {person.number}</p>)}
+      {persons.map(person => {
+        return (
+          <div key={person.id}>
+            <p>{person.name} {person.number}</p><button onClick={() => removePerson(person.id)}>delete</button>
+          </div>
+        )
+      })}
     </>
   )
 }

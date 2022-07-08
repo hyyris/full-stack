@@ -2,6 +2,7 @@ GET http://localhost:3003/api/blogs
 ###
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1sdXVra2FpIiwiaWQiOiI2MmM4M2I0MzVhYTM5YjZiOGYyNDFmYzciLCJpYXQiOjE2NTczMDI4MzEsImV4cCI6MTY1NzMwNjQzMX0.2RxPgxGxbdAFAJvTQCoOHh8EGgv27_Q7nC3cBs0TPk0
 
 {
   "title": "TT-Title",
@@ -9,3 +10,6 @@ Content-Type: application/json
   "url": "www.google.fi",
   "likes": 100
 }
+###
+DELETE http://localhost:3003/api/blogs/62c86fa2b7d75051d373a93b
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1sdXVra2FpIiwiaWQiOiI2MmM4M2I0MzVhYTM5YjZiOGYyNDFmYzciLCJpYXQiOjE2NTczMDI4MzEsImV4cCI6MTY1NzMwNjQzMX0.2RxPgxGxbdAFAJvTQCoOHh8EGgv27_Q7nC3cBs0TPk0

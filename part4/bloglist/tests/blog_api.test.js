@@ -1,9 +1,13 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+const helper = require('./test_helper')
+const bcrypt = require('bcrypt')
 const app = require('../app')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
+const blog = require('../models/blog')
 
 const initialBlogs = [
   {
@@ -46,8 +50,25 @@ describe('check initial data', () => {
 })
 
 describe('add data', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'root', passwordHash })
+    const savedUser = await user.save()
+
+    const blogs = await helper.blogsInDb()
+    await Blog.deleteMany({})
+    for (let blog of blogs) {
+      blog.user = savedUser._id
+      let blogObject = new Blog(blog)
+      await blogObject.save()
+    }
+  })
   // 4.10
   test('4.10 new blog is added', async () => {
+    const usersAtStart = await helper.usersInDb()
+
     const newBlog = {
       title: 'async/await simplifies making async calls',
       author: "Tester",
@@ -58,6 +79,7 @@ describe('add data', () => {
     await api
       .post('/api/blogs')
       .send(newBlog)
+      .set('Authorization', 'bearer ' + usersAtStart[0].token)
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
@@ -73,6 +95,7 @@ describe('add data', () => {
 
   // 4.11
   test('4.11 likes default to 0', async () => {
+    const usersAtStart = await helper.usersInDb()
     const newBlog = {
       title: 'missing likes',
       author: "Tester",
@@ -82,6 +105,7 @@ describe('add data', () => {
     await api
       .post('/api/blogs')
       .send(newBlog)
+      .set('Authorization', 'bearer ' + usersAtStart[0].token)
       .expect(201)
       .expect('Content-Type', /application\/json/)
     
@@ -93,6 +117,7 @@ describe('add data', () => {
 
   // 4.12
   test('4.12 missing title and url gives an error', async () => {
+    const usersAtStart = await helper.usersInDb()
     const newBlog = {
       author: "Tester",
     }
@@ -100,22 +125,54 @@ describe('add data', () => {
     await api
       .post('/api/blogs')
       .send(newBlog)
+      .set('Authorization', 'bearer ' + usersAtStart[0].token)
       .expect(400)
 
     const response = await api.get('/api/blogs')
 
     expect(response.body).toHaveLength(initialBlogs.length)
   })
+  // 4.23
+  test('4.23 fail to add a new blog', async () => {
+    const newBlog = {
+      title: 'async/await simplifies making async calls',
+      author: "Tester",
+      url: "http://www.google.com",
+      likes: 0,
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
+  })
 })
 
 describe('deletion of a blog', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'root', passwordHash })
+    const savedUser = await user.save()
+
+    const blogs = await helper.blogsInDb()
+    await Blog.deleteMany({})
+    for (let blog of blogs) {
+      blog.user = savedUser._id
+      let blogObject = new Blog(blog)
+      await blogObject.save()
+    }
+  })
   //4.13
   test('4.13 succeeds with status code 204 if id is valid', async () => {
+    const usersAtStart = await helper.usersInDb()
     const initialResponse = await api.get('/api/blogs')
     const blogToDelete = initialResponse.body[0]
-
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', 'bearer ' + usersAtStart[0].token)
       .expect(204)
 
     const afterResponse = await api.get('/api/blogs')
@@ -131,8 +188,24 @@ describe('deletion of a blog', () => {
 })
 
 describe('updating of a blog', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'root', passwordHash })
+    const savedUser = await user.save()
+
+    const blogs = await helper.blogsInDb()
+    await Blog.deleteMany({})
+    for (let blog of blogs) {
+      blog.user = savedUser._id
+      let blogObject = new Blog(blog)
+      await blogObject.save()
+    }
+  })
   //4.14
   test('4.14 succesfully updates likes of a blog', async () => {
+    const usersAtStart = await helper.usersInDb()
     const initialResponse = await api.get('/api/blogs')
     const blogToUpdate = initialResponse.body[0]
     const updatedLikes = blogToUpdate.likes + 1
@@ -141,6 +214,7 @@ describe('updating of a blog', () => {
     await api
       .put(`/api/blogs/${blogToUpdate.id}`)
       .send(blogToUpdate)
+      .set('Authorization', 'bearer ' + usersAtStart[0].token)
 
     const afterResponse = await api.get('/api/blogs')
 

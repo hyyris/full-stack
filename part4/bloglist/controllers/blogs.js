@@ -27,12 +27,12 @@ blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) =
   response.status(204).end()
 })
 
-blogsRouter.put('/:id', middleware.userExtractor,async (request, response) => {
-  const user = request.user
+blogsRouter.put('/:id', /*middleware.userExtractor,*/ async (request, response) => {
+  //const user = request.user
   const blog = await Blog.findById(request.params.id)
-  if (blog.user.toString() !== user._id.toString()) {
+  /*if (blog.user.toString() !== user._id.toString()) {
     return response.status(401).json({ error: 'invalid user' })
-  }
+  }*/
   const body = request.body
 
   blog.title = body.title

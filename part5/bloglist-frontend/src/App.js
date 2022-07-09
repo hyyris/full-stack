@@ -16,19 +16,19 @@ const App = () => {
 
   const sortFn =(a, b) => {
     if (a.likes > b.likes) {
-      return -1;
+      return -1
     }
     if (a.likes < b.likes) {
-      return 1;
+      return 1
     }
-    return 0;
+    return 0
   }
 
   useEffect(() => {
     blogService.getAll().then(blogs => {
       blogs.sort(sortFn)
-      setBlogs( blogs ) 
-    })  
+      setBlogs( blogs )
+    })
   }, [])
 
   useEffect(() => {
@@ -48,14 +48,13 @@ const App = () => {
 
   const handleLogin = async (event) => {
     event.preventDefault()
-    
     try {
       const user = await loginService.login({
         username, password,
       })
       window.localStorage.setItem(
         'loggedUser', JSON.stringify(user)
-      ) 
+      )
       blogService.setToken(user.token)
       setUser(user)
       setUsername('')
@@ -95,7 +94,7 @@ const App = () => {
         const newBlogs = blogs.map(blog => blog.id !== blogObject.id ? blog : returnedBlog).sort(sortFn)
         setBlogs(newBlogs)
         setNotificationMessage({
-          message: `blog updated`,
+          message: 'blog updated',
           error: false
         })
         setTimeout(() => {
@@ -110,7 +109,7 @@ const App = () => {
       .then(() => {
         setBlogs(blogs.filter(blog => blog.id !== id))
         setNotificationMessage({
-          message: `blog removed`,
+          message: 'blog removed',
           error: false
         })
         setTimeout(() => {
@@ -125,7 +124,7 @@ const App = () => {
       <form onSubmit={handleLogin}>
         <div>
           username
-            <input
+          <input
             type="text"
             value={username}
             name="Username"
@@ -134,7 +133,7 @@ const App = () => {
         </div>
         <div>
           password
-            <input
+          <input
             type="password"
             value={password}
             name="Password"
@@ -162,7 +161,7 @@ const App = () => {
       )}
     </>
   )
-  
+
   return (
     <div>
       <Notification message={notificationMessage} />

@@ -28,7 +28,7 @@ const Blog = ({ blog, updateBlog, removeBlog, user }) => {
   const remove = () => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
       removeBlog(blog.id)
-    } 
+    }
   }
 
   return (
@@ -54,7 +54,8 @@ const Blog = ({ blog, updateBlog, removeBlog, user }) => {
           {user.username === blog.user?.username ? <button onClick={() => remove()}>remove</button> : <></>}
         </div>
       </div>
-  </div>
-)}
+    </div>
+  )
+}
 
 export default Blog

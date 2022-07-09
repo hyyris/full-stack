@@ -1,22 +1,34 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import BlogForm from './components/BlogForm'
+import Togglable from './components/Togglable'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [newTitle, setNewTitle] = useState('')
-  const [newAuthor, setNewAuthor] = useState('')
-  const [newUrl, setNewUrl] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [notificationMessage, setNotificationMessage] = useState(null)
 
+  const blogFormRef = useRef()
+
+  const sortFn =(a, b) => {
+    if (a.likes > b.likes) {
+      return -1;
+    }
+    if (a.likes < b.likes) {
+      return 1;
+    }
+    return 0;
+  }
+
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )  
+    blogService.getAll().then(blogs => {
+      blogs.sort(sortFn)
+      setBlogs( blogs ) 
+    })  
   }, [])
 
   useEffect(() => {
@@ -59,18 +71,13 @@ const App = () => {
     }
   }
 
-  const addBlog = (event) => {
-    event.preventDefault()
-    const blogObject = {
-      title: newTitle,
-      author: newAuthor,
-      url: newUrl,
-    }
-
+  const addBlog = (blogObject) => {
     blogService
       .create(blogObject)
       .then(returnedBlog => {
-        setBlogs(blogs.concat(returnedBlog))
+        const newBlogs = blogs.concat(returnedBlog).sort(sortFn)
+        setBlogs(newBlogs)
+        blogFormRef.current.toggleVisibility()
         setNotificationMessage({
           message: `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`,
           error: false
@@ -78,20 +85,38 @@ const App = () => {
         setTimeout(() => {
           setNotificationMessage(null)
         }, 5000)
-        setNewTitle('')
-        setNewAuthor('')
-        setNewUrl('')
       })
   }
 
-  const handleTitleChange = (event) => {
-    setNewTitle(event.target.value)
+  const updateBlog = (blogObject) => {
+    blogService
+      .update(blogObject)
+      .then(returnedBlog => {
+        const newBlogs = blogs.map(blog => blog.id !== blogObject.id ? blog : returnedBlog).sort(sortFn)
+        setBlogs(newBlogs)
+        setNotificationMessage({
+          message: `blog updated`,
+          error: false
+        })
+        setTimeout(() => {
+          setNotificationMessage(null)
+        }, 5000)
+      })
   }
-  const handleAuthorChange = (event) => {
-    setNewAuthor(event.target.value)
-  }
-  const handleUrlChange = (event) => {
-    setNewUrl(event.target.value)
+
+  const removeBlog = (id) => {
+    blogService
+      .remove(id)
+      .then(() => {
+        setBlogs(blogs.filter(blog => blog.id !== id))
+        setNotificationMessage({
+          message: `blog removed`,
+          error: false
+        })
+        setTimeout(() => {
+          setNotificationMessage(null)
+        }, 5000)
+      })
   }
 
   const loginForm = () => (
@@ -128,26 +153,12 @@ const App = () => {
       <form onSubmit={handleLogout}>
         <button type="submit">logout</button>
       </form><br />
-      <form onSubmit={addBlog}>
-        <span>Title: </span>
-        <input
-          value={newTitle}
-          onChange={handleTitleChange}
-        /><br />
-        <span>Author: </span>
-        <input
-          value={newAuthor}
-          onChange={handleAuthorChange}
-        /><br />
-        <span>Url: </span>
-        <input
-          value={newUrl}
-          onChange={handleUrlChange}
-        /><br />
-        <button type="submit">create</button>
-      </form><br />
+      <Togglable buttonLabel="create new blog" ref={blogFormRef}>
+        <BlogForm addBlog={addBlog} />
+      </Togglable>
+      <br />
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} updateBlog={updateBlog} removeBlog={removeBlog} user={user} />
       )}
     </>
   )

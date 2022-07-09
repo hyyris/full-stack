@@ -32,7 +32,7 @@ const Blog = ({ blog, updateBlog, removeBlog, user }) => {
   }
 
   return (
-    <div style={blogStyle}>
+    <div className='blog' style={blogStyle}>
       <div>
         {blog.title} {blog.author}
       </div>
@@ -51,7 +51,7 @@ const Blog = ({ blog, updateBlog, removeBlog, user }) => {
           <div>
             {blog?.user?.name ? blog.user.name : blog?.user?.username}
           </div>
-          {user.username === blog.user?.username ? <button onClick={() => remove()}>remove</button> : <></>}
+          {user?.username === blog.user?.username ? <button onClick={() => remove()}>remove</button> : <></>}
         </div>
       </div>
     </div>

@@ -17,6 +17,16 @@ const asObject = (anecdote) => {
   }
 }
 
+const sortFn =(a, b) => {
+  if (a.votes > b.votes) {
+    return -1
+  }
+  if (a.votes < b.votes) {
+    return 1
+  }
+  return 0
+}
+
 const initialState = anecdotesAtStart.map(asObject)
 
 const reducer = (state = initialState, action) => {
@@ -33,10 +43,10 @@ const reducer = (state = initialState, action) => {
       }
       return state.map(a =>
         a.id !== id ? a : changedAnecdote 
-      )
+      ).sort(sortFn)
     case 'CREATE':
-      return [...state, action.data]
-    default: return state
+      return [...state, action.data].sort(sortFn)
+    default: return state.sort(sortFn)
   }
 }
 

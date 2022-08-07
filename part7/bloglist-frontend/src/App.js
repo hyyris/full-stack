@@ -2,12 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import BlogForm from './components/BlogForm';
 import Togglable from './components/Togglable';
 import Blog from './components/Blog';
+import Users from './components/Users'
 import blogService from './services/blogs';
 import loginService from './services/login';
+import userService from './services/users';
 import { Button, Form } from 'react-bootstrap'
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
+  const [users, setUsers] = useState([]);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
@@ -29,6 +32,9 @@ const App = () => {
     blogService.getAll().then((blogs) => {
       blogs.sort(sortFn);
       setBlogs(blogs);
+    });
+    userService.getAll().then((users) => {
+      setUsers(users);
     });
   }, []);
 
@@ -150,6 +156,8 @@ const App = () => {
       <form onSubmit={handleLogout}>
         <Button variant="info" type="submit">logout</Button>
       </form>
+      <br />
+      <Users users={users} />
       <br />
       <Togglable buttonLabel="create new blog" ref={blogFormRef}>
         <BlogForm addBlog={addBlog} />

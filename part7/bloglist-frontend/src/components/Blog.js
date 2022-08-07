@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Button } from 'react-bootstrap'
 
 const Blog = ({ blog, updateBlog, removeBlog, user }) => {
   const [visible, setVisible] = useState(false);
@@ -38,17 +39,17 @@ const Blog = ({ blog, updateBlog, removeBlog, user }) => {
       </div>
       <div>
         <div style={hideWhenVisible}>
-          <button onClick={toggleVisibility}>view</button>
+          <Button variant="link" onClick={toggleVisibility}>view</Button>
         </div>
         <div style={showWhenVisible}>
-          <button onClick={toggleVisibility}>hide</button>
+          <Button variant="link" onClick={toggleVisibility}>hide</Button>
           <div>{blog.url}</div>
           <div>
-            likes {blog.likes} <button onClick={() => update()}>like</button>
+            likes {blog.likes} <Button variant="success" onClick={() => update()}>like</Button>
           </div>
           <div>{blog?.user?.name ? blog.user.name : blog?.user?.username}</div>
           {user?.username === blog.user?.username ? (
-            <button onClick={() => remove()}>remove</button>
+            <Button variant="danger" onClick={() => remove()}>remove</Button>
           ) : (
             <></>
           )}

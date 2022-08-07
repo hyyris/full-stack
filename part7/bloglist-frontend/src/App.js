@@ -4,6 +4,7 @@ import Togglable from './components/Togglable';
 import Blog from './components/Blog';
 import blogService from './services/blogs';
 import loginService from './services/login';
+import { Button, Form } from 'react-bootstrap'
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -116,31 +117,29 @@ const App = () => {
   const loginForm = () => (
     <>
       <h2>Log in to application</h2>
-      <form onSubmit={handleLogin}>
-        <div>
-          username
-          <input
+      <Form onSubmit={handleLogin}>
+        <Form.Group>
+          <Form.Label>username</Form.Label>
+          <Form.Control
             id="username"
             type="text"
             value={username}
             name="Username"
             onChange={({ target }) => setUsername(target.value)}
           />
-        </div>
-        <div>
-          password
-          <input
+          <Form.Label>password</Form.Label>
+          <Form.Control
             id="password"
             type="password"
             value={password}
             name="Password"
             onChange={({ target }) => setPassword(target.value)}
           />
-        </div>
-        <button id="login-button" type="submit">
+        </Form.Group>
+        <Button id="login-button" type="submit">
           login
-        </button>
-      </form>
+        </Button>
+      </Form>
     </>
   );
 
@@ -149,7 +148,7 @@ const App = () => {
       <h2>blogs</h2>
       <p>{user.name} logged-in</p>
       <form onSubmit={handleLogout}>
-        <button type="submit">logout</button>
+        <Button variant="info" type="submit">logout</Button>
       </form>
       <br />
       <Togglable buttonLabel="create new blog" ref={blogFormRef}>
@@ -169,7 +168,7 @@ const App = () => {
   );
 
   return (
-    <div>
+    <div className="container">
       <Notification message={notificationMessage} />
       {user === null ? loginForm() : blogForm()}
     </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button } from 'react-bootstrap'
+import { Button, Card, ListGroup } from 'react-bootstrap'
 
 const Blog = ({ blog, updateBlog, removeBlog, user }) => {
   const [visible, setVisible] = useState(false);
@@ -33,29 +33,31 @@ const Blog = ({ blog, updateBlog, removeBlog, user }) => {
   };
 
   return (
-    <div className="blog" style={blogStyle}>
-      <div>
-        {blog.title} {blog.author}
-      </div>
-      <div>
-        <div style={hideWhenVisible}>
-          <Button variant="link" onClick={toggleVisibility}>view</Button>
-        </div>
-        <div style={showWhenVisible}>
-          <Button variant="link" onClick={toggleVisibility}>hide</Button>
-          <div>{blog.url}</div>
-          <div>
-            likes {blog.likes} <Button variant="success" onClick={() => update()}>like</Button>
+    <Card className="blog" style={blogStyle} >
+      <Card.Body>
+        <Card.Title>{blog.title} {blog.author}</Card.Title>
+        <Card.Text>
+          <div style={hideWhenVisible}>
+            <Button variant="link" onClick={toggleVisibility}>view</Button>
           </div>
-          <div>{blog?.user?.name ? blog.user.name : blog?.user?.username}</div>
-          {user?.username === blog.user?.username ? (
-            <Button variant="danger" onClick={() => remove()}>remove</Button>
-          ) : (
-            <></>
-          )}
-        </div>
-      </div>
-    </div>
+          <div style={showWhenVisible}>
+            <Button variant="link" onClick={toggleVisibility}>hide</Button>
+            <ListGroup variant="flush">
+              <ListGroup.Item>{blog.url}</ListGroup.Item>
+              <ListGroup.Item>
+                likes {blog.likes} <Button variant="success" onClick={() => update()}>like</Button>
+              </ListGroup.Item>
+              <ListGroup.Item>{blog?.user?.name ? blog.user.name : blog?.user?.username}</ListGroup.Item>
+              {user?.username === blog.user?.username ? (
+                <ListGroup.Item><Button variant="danger" onClick={() => remove()}>remove</Button></ListGroup.Item>
+              ) : (
+                <></>
+              )}
+            </ListGroup>
+          </div>
+        </Card.Text>
+      </Card.Body>
+    </Card>
   );
 };
 

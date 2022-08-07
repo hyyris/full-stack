@@ -6,7 +6,7 @@ import Users from './components/Users'
 import blogService from './services/blogs';
 import loginService from './services/login';
 import userService from './services/users';
-import { Button, Form } from 'react-bootstrap'
+import { Alert, Button, Form } from 'react-bootstrap'
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -184,23 +184,13 @@ const App = () => {
 };
 
 const Notification = ({ message }) => {
-  const notificationStyle = {
-    color: 'green',
-    background: 'lightgrey',
-    fontStyle: 'italic',
-    fontSize: 20,
-    borderStyle: 'solid',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-  };
+  let variant = 'success';
   if (message === null) {
     return null;
   } else if (message.error) {
-    notificationStyle.color = 'red';
+    variant = 'danger';
   }
-
-  return <div style={notificationStyle}>{message.message}</div>;
+  return <Alert variant={variant} >{message.message}</Alert>;
 };
 
 export default App;
